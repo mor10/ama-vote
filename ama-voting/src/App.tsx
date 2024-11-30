@@ -18,7 +18,7 @@ function App() {
         <h1 className="text-2xl font-bold">AMA Session</h1>
         <button
           onClick={logout}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 focus:bg-red-500 focus:text-white focus:border-red-500 transition-colors"
         >
           Logout
         </button>
@@ -28,18 +28,18 @@ function App() {
         <button
           className={`px-4 py-2 rounded-lg transition-colors ${
             activeTab === 'pending' 
-              ? 'bg-blue-500 text-white' 
-              : 'bg-gray-100 hover:bg-gray-200'
+              ? 'bg-black text-white' 
+              : 'bg-gray-200 hover:bg-gray-300'
           }`}
           onClick={() => setActiveTab('pending')}
         >
-          Pending
+          Questions
         </button>
         <button
           className={`px-4 py-2 rounded-lg transition-colors ${
             activeTab === 'answered' 
-              ? 'bg-blue-500 text-white' 
-              : 'bg-gray-100 hover:bg-gray-200'
+              ? 'bg-black text-white' 
+              : 'bg-gray-200 hover:bg-gray-300'
           }`}
           onClick={() => setActiveTab('answered')}
         >
@@ -48,8 +48,8 @@ function App() {
         <button
           className={`px-4 py-2 rounded-lg transition-colors ${
             activeTab === 'ask' 
-              ? 'bg-blue-500 text-white' 
-              : 'bg-gray-100 hover:bg-gray-200'
+              ? 'bg-black text-white' 
+              : 'bg-gray-200 hover:bg-gray-300'
           }`}
           onClick={() => setActiveTab('ask')}
         >

@@ -13,7 +13,7 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
       {questions.map(question => (
         <div 
           key={question.id}
-          className="py-6 flex items-center gap-6"
+          className="py-6 flex items-start gap-6"
         >
           {/* Vote count box */}
           <div className="flex-shrink-0">
