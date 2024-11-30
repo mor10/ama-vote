@@ -1,18 +1,24 @@
 import { useState } from 'react'
 
 interface QuestionFormProps {
-  onSubmit: (text: string) => void
+  onSubmit: (text: string) => Promise<void>
 }
 
 function QuestionForm({ onSubmit }: QuestionFormProps) {
   const [text, setText] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!text.trim()) return
+    if (!text.trim() || isSubmitting) return
     
-    onSubmit(text.trim())
-    setText('')
+    setIsSubmitting(true)
+    try {
+      await onSubmit(text.trim())
+      setText('')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -45,9 +51,14 @@ function QuestionForm({ onSubmit }: QuestionFormProps) {
       
       <button
         type="submit"
-        className="w-full sm:w-auto px-6 py-2 bg-gray-200 text-black  hover:bg-black hover:text-white transition-colors"
+        disabled={isSubmitting}
+        className={`w-full sm:w-auto px-6 py-2 bg-gray-200 text-black transition-colors ${
+          isSubmitting 
+            ? 'opacity-50 cursor-not-allowed'
+            : 'hover:bg-black hover:text-white'
+        }`}
       >
-        Submit Question
+        {isSubmitting ? 'Processing...' : 'Submit Question'}
       </button>
     </form>
   )

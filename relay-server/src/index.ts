@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import type { ApiResponse, Question } from './types.ts'
+import { improveQuestion } from './services/openai.ts'
 
 const app = express()
 const port = 3000
@@ -18,7 +19,7 @@ app.get('/questions', (_, res) => {
 })
 
 // Add a question
-app.post('/questions', (req, res) => {
+app.post('/questions', async (req, res) => {
   const { text, author } = req.body
   
   if (!text?.trim() || !author?.trim()) {
@@ -26,9 +27,12 @@ app.post('/questions', (req, res) => {
     return res.status(400).json(response)
   }
 
+  // Process question through OpenAI
+  const improvedText = await improveQuestion(text.trim())
+
   const newQuestion: Question = {
     id: crypto.randomUUID(),
-    text: text.trim(),
+    text: improvedText,
     votes: 1,
     author: author.trim(),
     isAnswered: false,
