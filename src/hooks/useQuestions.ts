@@ -5,57 +5,79 @@ import type { Question } from '../assets/types'
 function useQuestions() {
   const [questions, setQuestions] = useState<Question[]>([])
 
+  // Helper function to sort questions
+  const sortQuestions = (questions: Question[]) => 
+    [...questions].sort((a, b) => {
+      // First sort by votes (descending)
+      if (b.votes !== a.votes) return b.votes - a.votes
+      // Then by timestamp (descending) for questions with equal votes
+      return b.timestamp - a.timestamp
+    })
+
   const fetchQuestions = async () => {
     const { data, error } = await supabase
       .from('questions')
       .select('*')
-      .order('timestamp', { ascending: false })
+      .order('votes', { ascending: false }) // Primary sort in DB
+      .order('timestamp', { ascending: false }) // Secondary sort in DB
 
     if (error) throw error
 
-    // Map the data to match our frontend model
-    setQuestions(data?.map(item => ({
+    const mappedQuestions = data?.map(item => ({
       id: item.id,
       text: item.text,
       votes: item.votes,
       author: item.author,
-      isAnswered: item.is_answered,  // Map snake_case to camelCase
+      isAnswered: item.is_answered,
       voters: item.voters,
       timestamp: item.timestamp
-    })) || [])
+    })) || []
+
+    setQuestions(sortQuestions(mappedQuestions))
   }
 
   useEffect(() => {
     fetchQuestions()
+    const interval = setInterval(fetchQuestions, 10000)
 
     const subscription = supabase
-      .channel('questions')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions' }, 
+      .channel('questions-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'questions' },
         (payload) => {
           switch (payload.eventType) {
             case 'INSERT':
-              setQuestions(prev => [...prev, {
-                ...payload.new,
-                isAnswered: payload.new.is_answered
-              } as Question])
+              setQuestions(prev => sortQuestions([
+                {
+                  ...payload.new,
+                  isAnswered: payload.new.is_answered
+                } as Question,
+                ...prev
+              ]))
               break
             case 'DELETE':
-              setQuestions(prev => prev.filter(q => q.id !== payload.old.id))
+              setQuestions(prev => 
+                sortQuestions(prev.filter(q => q.id !== payload.old.id))
+              )
               break
             case 'UPDATE':
-              setQuestions(prev => prev.map(q => q.id === payload.new.id 
-                ? { ...payload.new, isAnswered: payload.new.is_answered } as Question
-                : q
-              ))
+              setQuestions(prev => 
+                sortQuestions(
+                  prev.map(q => q.id === payload.new.id 
+                    ? { ...payload.new, isAnswered: payload.new.is_answered } as Question
+                    : q
+                  )
+                )
+              )
               break
-            default:
-              fetchQuestions()
           }
         }
       )
       .subscribe()
 
     return () => {
+      clearInterval(interval)
       subscription.unsubscribe()
     }
   }, [])
@@ -117,7 +139,7 @@ function useQuestions() {
     const { error } = await supabase
       .from('questions')
       .delete()
-      .neq('id', '')  // Delete all rows
+      .neq('id', '')
 
     if (error) throw error
   }
