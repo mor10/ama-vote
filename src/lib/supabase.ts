@@ -19,6 +19,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
           : 'user'
         : 'anonymous'
     }
+  },
+  db: {
+    schema: 'public'
   }
 })
 

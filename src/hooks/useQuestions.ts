@@ -37,7 +37,7 @@ function useQuestions() {
         text: improvedText,
         votes: 1,
         author,
-        isAnswered: false,
+        is_answered: false,
         voters: [author],
         timestamp: Date.now()
       })
@@ -68,7 +68,7 @@ function useQuestions() {
   const markAnswered = async (questionId: string) => {
     const { error } = await supabase
       .from('questions')
-      .update({ isAnswered: true })
+      .update({ is_answered: true })
       .eq('id', questionId)
 
     if (error) throw error
