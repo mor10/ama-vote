@@ -38,14 +38,14 @@ function useQuestions() {
           // Handle different types of changes
           switch (payload.eventType) {
             case 'INSERT':
-              setQuestions(prev => [...prev, payload.new])
+              setQuestions(prev => [...prev, payload.new as Question])
               break
             case 'DELETE':
               setQuestions(prev => prev.filter(q => q.id !== payload.old.id))
               break
             case 'UPDATE':
               setQuestions(prev => 
-                prev.map(q => q.id === payload.new.id ? payload.new : q)
+                prev.map(q => q.id === payload.new.id ? (payload.new as Question) : q)
               )
               break
             default:
