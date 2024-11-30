@@ -1,26 +1,59 @@
 import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 import type { Question } from '../assets/types'
-import { supabase, improveQuestion } from '../lib/supabase'
 
 function useQuestions() {
   const [questions, setQuestions] = useState<Question[]>([])
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      console.log('Fetching questions...')
       const { data, error } = await supabase
         .from('questions')
         .select('*')
         .order('votes', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching questions:', error)
+        throw error
+      }
+      console.log('Fetched questions:', data)
       setQuestions(data || [])
     }
 
+    // Initial fetch
     fetchQuestions()
 
+    // Set up real-time subscription
     const subscription = supabase
       .channel('questions')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions' }, fetchQuestions)
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'questions' 
+        },
+        (payload) => {
+          // Handle different types of changes
+          switch (payload.eventType) {
+            case 'INSERT':
+              setQuestions(prev => [...prev, payload.new])
+              break
+            case 'DELETE':
+              setQuestions(prev => prev.filter(q => q.id !== payload.old.id))
+              break
+            case 'UPDATE':
+              setQuestions(prev => 
+                prev.map(q => q.id === payload.new.id ? payload.new : q)
+              )
+              break
+            default:
+              // Fetch all questions again for other cases
+              fetchQuestions()
+          }
+        }
+      )
       .subscribe()
 
     return () => {
@@ -28,13 +61,11 @@ function useQuestions() {
     }
   }, [])
 
-  const addQuestion = async (text: string, author: string) => {
-    const improvedText = await improveQuestion(text)
-    
+  const addQuestion = async (author: string, content: string) => {
     const { error } = await supabase
       .from('questions')
       .insert({
-        text: improvedText,
+        content,
         votes: 1,
         author,
         is_answered: false,
