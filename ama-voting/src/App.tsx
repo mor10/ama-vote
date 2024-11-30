@@ -18,7 +18,7 @@ function App() {
         <h1 className="text-2xl font-bold">AMA Session</h1>
         <button
           onClick={logout}
-          className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 focus:bg-red-500 focus:text-white focus:border-red-500 transition-colors"
+          className="px-4 py-2 border border-gray-300 text-gray-600  hover:bg-red-500 hover:text-white hover:border-red-500 focus:bg-red-500 focus:text-white focus:border-red-500 transition-colors"
         >
           Logout
         </button>
@@ -26,7 +26,7 @@ function App() {
 
       <div className="flex gap-2 mb-6">
         <button
-          className={`px-4 py-2 rounded-lg transition-colors ${
+          className={`px-4 py-2  transition-colors ${
             activeTab === 'pending' 
               ? 'bg-black text-white' 
               : 'bg-gray-200 hover:bg-gray-300'
@@ -36,7 +36,7 @@ function App() {
           Questions
         </button>
         <button
-          className={`px-4 py-2 rounded-lg transition-colors ${
+          className={`px-4 py-2  transition-colors ${
             activeTab === 'answered' 
               ? 'bg-black text-white' 
               : 'bg-gray-200 hover:bg-gray-300'
@@ -46,7 +46,7 @@ function App() {
           Answered
         </button>
         <button
-          className={`px-4 py-2 rounded-lg transition-colors ${
+          className={`px-4 py-2  transition-colors ${
             activeTab === 'ask' 
               ? 'bg-black text-white' 
               : 'bg-gray-200 hover:bg-gray-300'

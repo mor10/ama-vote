@@ -28,7 +28,7 @@ function QuestionForm({ onSubmit }: QuestionFormProps) {
           id="question"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border  focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
           placeholder="What's on your mind?"
           required
@@ -37,7 +37,7 @@ function QuestionForm({ onSubmit }: QuestionFormProps) {
       
       <button
         type="submit"
-        className="w-full sm:w-auto px-6 py-2 bg-gray-200 text-black rounded-lg hover:bg-black hover:text-white transition-colors"
+        className="w-full sm:w-auto px-6 py-2 bg-gray-200 text-black  hover:bg-black hover:text-white transition-colors"
       >
         Submit Question
       </button>

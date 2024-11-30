@@ -17,7 +17,7 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
         >
           {/* Vote count box */}
           <div className="flex-shrink-0">
-            <div className="w-16 h-16 border border-gray-300 rounded-lg flex flex-col items-center justify-center bg-gray-50">
+            <div className="w-16 h-16 border border-gray-300  flex flex-col items-center justify-center bg-gray-50">
               <span className="text-2xl font-bold text-gray-700">{question.votes}</span>
               <span className="text-xs text-gray-500">votes</span>
             </div>
@@ -27,7 +27,7 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
           <div className="flex-1 min-w-0">
             <p className="text-lg text-gray-900 mb-1">{question.text}</p>
             <p className="text-sm text-gray-500">
-              Asked by {question.author} • {new Date(question.timestamp).toLocaleString()}
+              Asked by {question.author}{/* • {new Date(question.timestamp).toLocaleString()} */}
             </p>
           </div>
 
@@ -36,7 +36,7 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
             {!question.isAnswered && (
               question.voters.includes(currentUser.name) ? (
                 <div 
-                  className="h-10 w-10 border border-gray-300 text-gray-400 rounded-lg flex items-center justify-center bg-gray-50"
+                  className="h-10 w-10 border border-gray-300 text-gray-400  flex items-center justify-center bg-gray-50"
                   aria-label="Already voted"
                 >
                   <svg 
@@ -57,7 +57,7 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
               ) : (
                 <button
                   onClick={() => onVote(question.id, currentUser.name)}
-                  className="h-10 w-10 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center font-medium"
+                  className="h-10 w-10 bg-gray-900 text-white  hover:bg-gray-800 transition-colors flex items-center justify-center font-medium"
                 >
                   +1
                 </button>
@@ -67,7 +67,7 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
             {currentUser.isAdmin && !question.isAnswered && (
               <button
                 onClick={() => onMarkAnswered(question.id)}
-                className="h-10 px-4 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                className="h-10 px-4 border border-blue-500 text-blue-600  hover:bg-blue-50 transition-colors"
               >
                 Mark Answered
               </button>
