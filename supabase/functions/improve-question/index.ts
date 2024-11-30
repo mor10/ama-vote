@@ -1,23 +1,27 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://mor10-ama.netlify.app',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Max-Age': '86400',
+const allowedOrigins = [
+  'https://mor10-ama.netlify.app',
+  'https://674ac07d3625d600089261cf--mor10-ama.netlify.app',
+  /^https:\/\/[a-z0-9]+-mor10-ama\.netlify\.app$/
+]
+
+function isAllowedOrigin(origin: string | null) {
+  if (!origin) return false
+  return allowedOrigins.some(allowed => {
+    if (allowed instanceof RegExp) return allowed.test(origin)
+    return allowed === origin
+  })
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-        'Content-Length': '0'
-      }
-    })
+  const origin = req.headers.get('origin')
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': isAllowedOrigin(origin) ? origin : 'https://mor10-ama.netlify.app',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Max-Age': '86400',
   }
 
   const responseHeaders = {
@@ -25,6 +29,38 @@ serve(async (req) => {
     'Content-Type': 'application/json'
   }
 
+  // Handle OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: responseHeaders
+    })
+  }
+
+  // Verify request method
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { 
+        status: 405,
+        headers: responseHeaders
+      }
+    )
+  }
+
+  // Check content type
+  const contentType = req.headers.get('content-type')
+  if (!contentType?.includes('application/json')) {
+    return new Response(
+      JSON.stringify({ error: 'Content-Type must be application/json' }),
+      { 
+        status: 400,
+        headers: responseHeaders
+      }
+    )
+  }
+
+  // Check authorization
   const authHeader = req.headers.get('authorization')
   if (!authHeader) {
     return new Response(
@@ -37,11 +73,14 @@ serve(async (req) => {
   }
 
   try {
-    const { text } = await req.json()
-    
-    if (!text) {
+    // Parse request body
+    let body
+    try {
+      body = await req.json()
+    } catch (e) {
+      console.error('Failed to parse request body:', e)
       return new Response(
-        JSON.stringify({ error: 'Text is required' }),
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
         { 
           status: 400,
           headers: responseHeaders
@@ -49,11 +88,21 @@ serve(async (req) => {
       )
     }
 
-    const openai = new OpenAI({
-      apiKey: Deno.env.get('OPENAI_API_KEY'),
-    })
+    // Validate text field
+    const { text } = body
+    if (!text || typeof text !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Text field is required and must be a string' }),
+        { 
+          status: 400,
+          headers: responseHeaders
+        }
+      )
+    }
 
-    if (!Deno.env.get('OPENAI_API_KEY')) {
+    // Check OpenAI API key
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
       console.error('Missing OpenAI API key')
       return new Response(
         JSON.stringify({ error: 'Configuration error' }),
@@ -63,6 +112,10 @@ serve(async (req) => {
         }
       )
     }
+
+    const openai = new OpenAI({
+      apiKey: openaiApiKey,
+    })
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -92,7 +145,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'An error occurred while processing your request',
+        details: error.message 
+      }),
       { 
         status: 500,
         headers: responseHeaders
