@@ -8,7 +8,20 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  global: {
+    headers: {
+      'x-user-name': localStorage.getItem('ama_user') 
+        ? JSON.parse(localStorage.getItem('ama_user')!).name 
+        : '',
+      'x-user-role': localStorage.getItem('ama_user') 
+        ? JSON.parse(localStorage.getItem('ama_user')!).isAdmin 
+          ? 'admin' 
+          : 'user'
+        : 'anonymous'
+    }
+  }
+})
 
 export async function improveQuestion(text: string): Promise<string> {
   const response = await fetch(

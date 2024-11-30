@@ -4,10 +4,17 @@ interface QuestionListProps {
   questions: Question[]
   onVote: (questionId: string, voter: string) => void
   onMarkAnswered: (questionId: string) => void
+  onDeleteQuestion?: (questionId: string) => void
   currentUser: User
 }
 
-function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: QuestionListProps) {
+function QuestionList({ 
+  questions, 
+  onVote, 
+  onMarkAnswered, 
+  onDeleteQuestion,
+  currentUser 
+}: QuestionListProps) {
   return (
     <div className="divide-y divide-gray-200">
       {questions.map(question => (
@@ -70,6 +77,16 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
                 className="h-10 px-4 border border-blue-500 text-blue-600  hover:bg-blue-50 transition-colors"
               >
                 Mark Answered
+              </button>
+            )}
+            
+            {currentUser.isAdmin && onDeleteQuestion && (
+              <button
+                onClick={() => onDeleteQuestion(question.id)}
+                className="h-10 px-4 border border-red-500 text-red-600 hover:bg-red-50 transition-colors"
+                title="Delete question"
+              >
+                Delete
               </button>
             )}
           </div>

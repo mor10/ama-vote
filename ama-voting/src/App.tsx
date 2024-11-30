@@ -6,9 +6,26 @@ import QuestionList from './components/QuestionList'
 import QuestionForm from './components/QuestionForm'
 
 function App() {
-  const { user, login, logout } = useAuth()
-  const { questions, addQuestion, voteQuestion, markAnswered } = useQuestions()
+  const { user, login, logout, deleteAllUsers } = useAuth()
+  const { 
+    questions, 
+    addQuestion, 
+    voteQuestion, 
+    markAnswered,
+    deleteQuestion,
+    deleteAllQuestions 
+  } = useQuestions()
   const [activeTab, setActiveTab] = useState<'pending' | 'answered' | 'ask'>('pending')
+
+  const handleDeleteAll = async () => {
+    if (!confirm('Are you sure you want to delete all questions? This cannot be undone.')) return
+    await deleteAllQuestions()
+  }
+
+  const handleDeleteAllUsers = async () => {
+    if (!confirm('Are you sure you want to delete all users? This cannot be undone.')) return
+    await deleteAllUsers()
+  }
 
   if (!user) return <LoginForm onLogin={login} />
 
@@ -30,6 +47,27 @@ function App() {
         </button>
         
       </div>
+
+      {/* Admin Controls */}
+      {user.isAdmin && (
+        <div className="mb-6 p-4 border border-red-200 bg-red-50 rounded">
+          <h2 className="text-lg font-bold text-red-800 mb-3">Admin Controls</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDeleteAll}
+              className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors"
+            >
+              Delete All Questions
+            </button>
+            <button
+              onClick={handleDeleteAllUsers}
+              className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors"
+            >
+              Delete All Users
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-2 mb-6">
         <button
@@ -76,6 +114,7 @@ function App() {
           questions={questions.filter(q => q.isAnswered === (activeTab === 'answered'))}
           onVote={voteQuestion}
           onMarkAnswered={markAnswered}
+          onDeleteQuestion={user.isAdmin ? deleteQuestion : undefined}
           currentUser={user}
         />
       )}

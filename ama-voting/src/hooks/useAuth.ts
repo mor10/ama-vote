@@ -30,7 +30,12 @@ function useAuth() {
     setUser(null)
   }
 
-  return { user, login, logout }
+  const deleteAllUsers = async () => {
+    localStorage.clear() // Clear local storage
+    setUser(null)
+  }
+
+  return { user, login, logout, deleteAllUsers }
 }
 
 export default useAuth 

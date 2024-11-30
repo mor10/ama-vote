@@ -74,7 +74,32 @@ function useQuestions() {
     if (error) throw error
   }
 
-  return { questions, addQuestion, voteQuestion, markAnswered }
+  const deleteQuestion = async (questionId: string) => {
+    const { error } = await supabase
+      .from('questions')
+      .delete()
+      .eq('id', questionId)
+
+    if (error) throw error
+  }
+
+  const deleteAllQuestions = async () => {
+    const { error } = await supabase
+      .from('questions')
+      .delete()
+      .neq('id', '')  // Delete all rows
+
+    if (error) throw error
+  }
+
+  return { 
+    questions, 
+    addQuestion, 
+    voteQuestion, 
+    markAnswered, 
+    deleteQuestion,
+    deleteAllQuestions 
+  }
 }
 
 export default useQuestions
