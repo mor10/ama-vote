@@ -60,7 +60,7 @@ function useQuestions() {
     }
   }, [])
 
-  const addQuestion = async (author: string, text: string) => {
+  const addQuestion = async (text: string, author: string) => {
     const { error } = await supabase
       .from('questions')
       .insert({
