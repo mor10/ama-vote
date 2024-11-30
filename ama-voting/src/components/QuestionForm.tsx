@@ -35,7 +35,10 @@ function QuestionForm({ onSubmit }: QuestionFormProps) {
           htmlFor="question" 
           className="block text-gray-700 mb-2"
         >
-          Ask a Question
+          <h2 className="text-lg font-bold">Ask a Question</h2>
+          <p className="text-sm text-gray-500">
+            Questions are moderated by AI because reasons.
+          </p>
         </label>
         <textarea
           id="question"
