@@ -15,6 +15,13 @@ function QuestionForm({ onSubmit }: QuestionFormProps) {
     setText('')
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault()
+      handleSubmit(e as unknown as React.FormEvent)
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="mb-8">
       <div className="mb-4">
@@ -28,9 +35,10 @@ function QuestionForm({ onSubmit }: QuestionFormProps) {
           id="question"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="w-full px-3 py-2 border  focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
-          placeholder="What's on your mind?"
+          placeholder="What's on your mind? (Shift+Enter to submit)"
           required
         />
       </div>

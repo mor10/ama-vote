@@ -58,7 +58,12 @@ function App() {
       </div>
 
       {activeTab === 'ask' ? (
-        <QuestionForm onSubmit={text => addQuestion(text, user.name)} />
+        <QuestionForm 
+          onSubmit={(text) => {
+            addQuestion(text, user.name)
+            setActiveTab('pending')
+          }} 
+        />
       ) : (
         <QuestionList
           questions={questions.filter(q => q.isAnswered === (activeTab === 'answered'))}
