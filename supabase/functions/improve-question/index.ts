@@ -3,7 +3,7 @@ import OpenAI from 'https://esm.sh/openai@4.20.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production'
-    ? 'https://your-production-domain.com'
+    ? 'https://mor10-ama.netlify.app'
     : 'http://localhost:5173',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
