@@ -4,7 +4,7 @@ import OpenAI from 'https://esm.sh/openai@4.20.1'
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://mor10-ama.netlify.app',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Max-Age': '86400',
 }
 
@@ -14,11 +14,26 @@ serve(async (req) => {
       status: 204,
       headers: {
         ...corsHeaders,
-        'Access-Control-Allow-Origin': 'https://mor10-ama.netlify.app',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': '*'
+        'Content-Type': 'application/json',
+        'Content-Length': '0'
       }
     })
+  }
+
+  const responseHeaders = {
+    ...corsHeaders,
+    'Content-Type': 'application/json'
+  }
+
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader) {
+    return new Response(
+      JSON.stringify({ error: 'Missing authorization header' }),
+      { 
+        status: 401,
+        headers: responseHeaders
+      }
+    )
   }
 
   try {
@@ -29,7 +44,7 @@ serve(async (req) => {
         JSON.stringify({ error: 'Text is required' }),
         { 
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: responseHeaders
         }
       )
     }
@@ -44,7 +59,7 @@ serve(async (req) => {
         JSON.stringify({ error: 'Configuration error' }),
         { 
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: responseHeaders
         }
       )
     }
@@ -71,10 +86,7 @@ serve(async (req) => {
       JSON.stringify({ improvedText }),
       { 
         status: 200,
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
-        }
+        headers: responseHeaders
       }
     )
   } catch (error) {
@@ -83,7 +95,7 @@ serve(async (req) => {
       JSON.stringify({ error: error.message }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: responseHeaders
       }
     )
   }
