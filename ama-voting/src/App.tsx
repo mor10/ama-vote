@@ -66,8 +66,8 @@ function App() {
 
       {activeTab === 'ask' ? (
         <QuestionForm 
-          onSubmit={(text) => {
-            addQuestion(text, user.name)
+          onSubmit={async (text) => {
+            await addQuestion(text, user.name)
             setActiveTab('pending')
           }} 
         />
