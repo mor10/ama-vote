@@ -83,6 +83,21 @@ function useQuestions() {
   }, [])
 
   const addQuestion = async (text: string, author: string) => {
+    // Create new question object
+    const newQuestion: Question = {
+      id: crypto.randomUUID(), // Temporary ID
+      text,
+      votes: 1,
+      author,
+      isAnswered: false,
+      voters: [author],
+      timestamp: Date.now()
+    }
+
+    // Optimistically update UI
+    setQuestions(prev => sortQuestions([newQuestion, ...prev]))
+
+    // Then update server
     const { error } = await supabase
       .from('questions')
       .insert({
@@ -91,20 +106,42 @@ function useQuestions() {
         author,
         is_answered: false,
         voters: [author],
-        timestamp: Date.now()
+        timestamp: newQuestion.timestamp
       })
 
-    if (error) throw error
+    if (error) {
+      // Revert on error
+      setQuestions(prev => sortQuestions(prev.filter(q => q.id !== newQuestion.id)))
+      throw error
+    }
   }
 
   const voteQuestion = async (questionId: string, voter: string) => {
+    // Optimistically update UI
+    setQuestions(prev => sortQuestions(
+      prev.map(q => q.id === questionId 
+        ? { ...q, votes: q.votes + 1, voters: [...q.voters, voter] }
+        : q
+      )
+    ))
+
+    // Then update server
     const { data: question, error: fetchError } = await supabase
       .from('questions')
       .select('voters, votes')
       .eq('id', questionId)
       .single()
 
-    if (fetchError) throw fetchError
+    if (fetchError) {
+      // Revert on error
+      setQuestions(prev => sortQuestions(
+        prev.map(q => q.id === questionId 
+          ? { ...q, votes: q.votes - 1, voters: q.voters.filter(v => v !== voter) }
+          : q
+        )
+      ))
+      throw fetchError
+    }
 
     const { error: updateError } = await supabase
       .from('questions')
@@ -114,25 +151,63 @@ function useQuestions() {
       })
       .eq('id', questionId)
 
-    if (updateError) throw updateError
+    if (updateError) {
+      // Revert on error
+      setQuestions(prev => sortQuestions(
+        prev.map(q => q.id === questionId 
+          ? { ...q, votes: q.votes - 1, voters: q.voters.filter(v => v !== voter) }
+          : q
+        )
+      ))
+      throw updateError
+    }
   }
 
   const markAnswered = async (questionId: string) => {
+    // Optimistically update UI
+    setQuestions(prev => sortQuestions(
+      prev.map(q => q.id === questionId 
+        ? { ...q, isAnswered: true }
+        : q
+      )
+    ))
+
+    // Then update server
     const { error } = await supabase
       .from('questions')
       .update({ is_answered: true })
       .eq('id', questionId)
 
-    if (error) throw error
+    if (error) {
+      // Revert on error
+      setQuestions(prev => sortQuestions(
+        prev.map(q => q.id === questionId 
+          ? { ...q, isAnswered: false }
+          : q
+        )
+      ))
+      throw error
+    }
   }
 
   const deleteQuestion = async (questionId: string) => {
+    // Store question for potential revert
+    const deletedQuestion = questions.find(q => q.id === questionId)
+    
+    // Optimistically update UI
+    setQuestions(prev => sortQuestions(prev.filter(q => q.id !== questionId)))
+
+    // Then update server
     const { error } = await supabase
       .from('questions')
       .delete()
       .eq('id', questionId)
 
-    if (error) throw error
+    if (error && deletedQuestion) {
+      // Revert on error
+      setQuestions(prev => sortQuestions([...prev, deletedQuestion]))
+      throw error
+    }
   }
 
   const deleteAllQuestions = async () => {
