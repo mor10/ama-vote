@@ -2,31 +2,55 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production'
-    ? 'https://mor10-ama.netlify.app'
-    : 'http://localhost:5173',
+  'Access-Control-Allow-Origin': 'https://mor10-ama.netlify.app',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': '*',
   'Access-Control-Max-Age': '86400',
 }
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: corsHeaders,
-      status: 204
+    return new Response(null, {
+      status: 204,
+      headers: {
+        ...corsHeaders,
+        'Access-Control-Allow-Origin': 'https://mor10-ama.netlify.app',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': '*'
+      }
     })
   }
 
   try {
     const { text } = await req.json()
+    
+    if (!text) {
+      return new Response(
+        JSON.stringify({ error: 'Text is required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
 
     const openai = new OpenAI({
       apiKey: Deno.env.get('OPENAI_API_KEY'),
     })
 
+    if (!Deno.env.get('OPENAI_API_KEY')) {
+      console.error('Missing OpenAI API key')
+      return new Response(
+        JSON.stringify({ error: 'Configuration error' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',  // or 'gpt-3.5-turbo' for a more cost-effective option
+      model: 'gpt-4',
       messages: [
         {
           role: 'system',
@@ -45,9 +69,16 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ improvedText }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 200,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        }
+      }
     )
   } catch (error) {
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
