@@ -5,51 +5,50 @@ import type { Question } from '../assets/types'
 function useQuestions() {
   const [questions, setQuestions] = useState<Question[]>([])
 
+  const fetchQuestions = async () => {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('*')
+      .order('timestamp', { ascending: false })
+
+    if (error) throw error
+
+    // Map the data to match our frontend model
+    setQuestions(data?.map(item => ({
+      id: item.id,
+      text: item.text,
+      votes: item.votes,
+      author: item.author,
+      isAnswered: item.is_answered,  // Map snake_case to camelCase
+      voters: item.voters,
+      timestamp: item.timestamp
+    })) || [])
+  }
+
   useEffect(() => {
-    const fetchQuestions = async () => {
-      console.log('Fetching questions...')
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .order('votes', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching questions:', error)
-        throw error
-      }
-      console.log('Fetched questions:', data)
-      setQuestions(data || [])
-    }
-
-    // Initial fetch
     fetchQuestions()
 
-    // Set up real-time subscription
     const subscription = supabase
       .channel('questions')
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'questions' 
-        },
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions' }, 
         (payload) => {
-          // Handle different types of changes
           switch (payload.eventType) {
             case 'INSERT':
-              setQuestions(prev => [...prev, payload.new as Question])
+              setQuestions(prev => [...prev, {
+                ...payload.new,
+                isAnswered: payload.new.is_answered
+              } as Question])
               break
             case 'DELETE':
               setQuestions(prev => prev.filter(q => q.id !== payload.old.id))
               break
             case 'UPDATE':
-              setQuestions(prev => 
-                prev.map(q => q.id === payload.new.id ? (payload.new as Question) : q)
-              )
+              setQuestions(prev => prev.map(q => q.id === payload.new.id 
+                ? { ...payload.new, isAnswered: payload.new.is_answered } as Question
+                : q
+              ))
               break
             default:
-              // Fetch all questions again for other cases
               fetchQuestions()
           }
         }
