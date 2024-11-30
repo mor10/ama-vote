@@ -61,11 +61,11 @@ function useQuestions() {
     }
   }, [])
 
-  const addQuestion = async (author: string, content: string) => {
+  const addQuestion = async (author: string, text: string) => {
     const { error } = await supabase
       .from('questions')
       .insert({
-        content,
+        text,
         votes: 1,
         author,
         is_answered: false,
