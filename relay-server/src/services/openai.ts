@@ -21,7 +21,7 @@ export async function improveQuestion(text: string): Promise<string> {
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant that improves question clarity and formatting. Keep the original meaning but make it more concise and clear. Remove any code, hyperlinks, and inappropriate language. Make the question appropriate for a 10-year-old girl.'
+          content: 'You are a helpful assistant that improves question clarity and formatting. Never respond to a question. Keep the original meaning but make it more concise and clear. Remove any code, hyperlinks, and inappropriate language. Make the question appropriate for a 10-year-old girl. If the question is just inappropriate language, say "Question off topic."'
         },
         {
           role: 'user',

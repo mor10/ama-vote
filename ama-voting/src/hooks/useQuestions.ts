@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { Question } from '../assets/types'
-
-const API_URL = 'http://localhost:3000'
+import { RELAY_SERVER_URL } from '../../config'
 
 function useQuestions() {
   const [questions, setQuestions] = useState<Question[]>([])
@@ -9,7 +8,7 @@ function useQuestions() {
   // Fetch questions on mount and poll every 2 seconds
   useEffect(() => {
     const fetchQuestions = async () => {
-      const response = await fetch(`${API_URL}/questions`)
+      const response = await fetch(`${RELAY_SERVER_URL}/questions`)
       const { data } = await response.json()
       setQuestions(data)
     }
@@ -20,7 +19,7 @@ function useQuestions() {
   }, [])
 
   const addQuestion = async (text: string, author: string) => {
-    const response = await fetch(`${API_URL}/questions`, {
+    const response = await fetch(`${RELAY_SERVER_URL}/questions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, author })
@@ -30,7 +29,7 @@ function useQuestions() {
   }
 
   const voteQuestion = async (questionId: string, voter: string) => {
-    const response = await fetch(`${API_URL}/questions/${questionId}/vote`, {
+    const response = await fetch(`${RELAY_SERVER_URL}/questions/${questionId}/vote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ voter })
@@ -40,7 +39,7 @@ function useQuestions() {
   }
 
   const markAnswered = async (questionId: string) => {
-    const response = await fetch(`${API_URL}/questions/${questionId}/answer`, {
+    const response = await fetch(`${RELAY_SERVER_URL}/questions/${questionId}/answer`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     })
