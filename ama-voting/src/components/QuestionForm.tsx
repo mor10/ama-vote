@@ -37,7 +37,7 @@ function QuestionForm({ onSubmit }: QuestionFormProps) {
       
       <button
         type="submit"
-        className="w-full sm:w-auto px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        className="w-full sm:w-auto px-6 py-2 bg-gray-200 text-black rounded-lg hover:bg-black hover:text-white transition-colors"
       >
         Submit Question
       </button>

@@ -17,7 +17,7 @@ function QuestionList({ questions, onVote, onMarkAnswered, currentUser }: Questi
         >
           {/* Vote count box */}
           <div className="flex-shrink-0">
-            <div className="w-16 h-16 border border-gray-200 rounded-lg flex flex-col items-center justify-center bg-gray-50">
+            <div className="w-16 h-16 border border-gray-300 rounded-lg flex flex-col items-center justify-center bg-gray-50">
               <span className="text-2xl font-bold text-gray-700">{question.votes}</span>
               <span className="text-xs text-gray-500">votes</span>
             </div>

@@ -1,7 +1,6 @@
 import express from 'express'
 import cors from 'cors'
-import type { Question } from '../../ama-voting/src/assets/types'
-import type { ApiResponse } from './types'
+import type { ApiResponse, Question } from './types.ts'
 
 const app = express()
 const port = 3000
