@@ -17,13 +17,18 @@ export async function improveQuestion(text: string): Promise<string> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
       },
       body: JSON.stringify({ text })
     }
   )
 
-  if (!response.ok) throw new Error('Failed to improve question')
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(error.error || 'Failed to improve question')
+  }
+  
   const { improvedText } = await response.json()
   return improvedText
 }

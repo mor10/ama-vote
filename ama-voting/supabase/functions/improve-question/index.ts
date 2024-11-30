@@ -2,13 +2,20 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production'
+    ? 'https://your-production-domain.com'
+    : 'http://localhost:5173',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Max-Age': '86400',
 }
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { 
+      headers: corsHeaders,
+      status: 204
+    })
   }
 
   try {
